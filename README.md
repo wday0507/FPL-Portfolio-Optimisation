@@ -65,12 +65,57 @@ Total points already encapsulates the key performance metrics such as goals, ass
 
 Team Optimisation & Strategy
 
-In this section, we use each player's points in Season N as a proxy for their expected performance in Season N+1. Using this estimate, we build an optimal 15-player FPL squad under standard game constraints (budget, formation, max 3 per team) by solving a binary optimisation problem. The goal is to maximise expected points while respecting realistic squad structure rules.
+### Objective:
+
+The goal of the team optimization section is to select an optimal fantasy football squad for the next season. We aim to maximize the expected points from the starting 11 players while incorporating risk (variance in points) for the starting players. The objective function balances the points scored by the starting and bench players, while adjusting the impact of risk based on the **lambda\_risk** parameter.
+
+### What Are We Trying to Optimize and Why?
+
+We are trying to optimize the composition of the fantasy football squad to achieve the highest possible expected performance in the next season. Specifically, we focus on:
+
+* **Maximizing the expected points** of the starting 11 players and the bench.
+* **Minimizing risk** associated with the volatility of points for the starting players.
+
+The optimization takes into account both the points a player is expected to score and the variability (risk) of those points. This ensures that the team is composed of players who can consistently perform well, without overexposing to high risk.
+
+### Constraints:
+
+The optimization problem is subject to several constraints to ensure the squad is realistic and meets the requirements of the fantasy football format:
+
+1. **Squad Size:** The total number of players in the squad must be 15.
+2. **Starting Lineup:** Exactly 11 players must be in the starting lineup.
+3. **Position Constraints:**
+
+   * 2 goalkeepers (GK)
+   * 5 defenders (DEF)
+   * 5 midfielders (MID)
+   * 3 forwards (FWD)
+4. **Starting Lineup Formation:**
+   * 1 goalkeeper must be in the starting lineup.
+   * At least 3 defenders, 2 midfielders, and 1 forward must be in the starting lineup.
+   * Exactly 10 outfield players (DEF, MID, FWD) must be in the starting lineup.
+5. **Team Limitations:** A maximum of 3 players from any single team can be included in the squad.
+6. **Player Value:** The total value of players in the squad must not exceed a specified budget (e.g., the sum of their next season’s initial value should be ≤ 100).
+
+High-Level Algorithm:
+
+This problem is solved using **convex optimization**, where we define the optimization variables (whether a player is in the squad and whether they are in the starting lineup) and set up an objective function to maximize the expected points while minimizing risk. The **constraints** ensure that the team composition adheres to the rules of the fantasy football league.
+
+The problem is formulated as a **linear program** and solved using the **SCIPY solver** with the highs method for optimization, allowing us to find the optimal squad composition.
+
+Below is the optimal team choice for the 23/24 season based on 22/23 data. The algorithm clearly prioritised high-scoring forwards, particularly expensive, star talent like Haaland, which suggests a bias toward raw point totals rather than positional value. Most players underperformed in the following season, which is expected due to natural mean reversion — the model selects last season’s top performers, many of whom regress. Interestingly, the optimal squad often includes multiple players from the same club (e.g. Brentford, Arsenal), which could indicate a lack of diversification. While this might be coincidental, it also reflects the model’s tendency to stack players from strong-performing teams without accounting for correlated risk.
+
+![image](https://github.com/user-attachments/assets/b1f94429-82a1-4293-818e-80e938ab4bd2)
+
 
 Baseline Teams (for Comparison)
 
+To fairly benchmark my optimal team, I need a baseline to compare against. I simulate this by generating thousands of random teams using a simple greedy/random logic that mimics how a casual player might build their squad. The idea is: a typical user sees a list of players, grabs one or two expensive stars, then realises they’re running out of budget and fills the rest with mid-range or cheap options, often resulting in a few strong picks and a bunch of weak fillers. The algorithm follows this pattern by randomly choosing quotas of expensive, medium, and cheap players, then filling a squad under budget while satisfying basic position and club constraints. This gives me a realistic distribution of “naive” team performances to compare against helping to show whether my optimised solution actually adds value over random or common-sense strategies.
+
 
 Results
+Results show that generally my optimal team outperforms the average 'baseline team'.
 
+![image](https://github.com/user-attachments/assets/71573da9-7523-4b47-a607-bd5efad8fa47)
 
 Next Steps
