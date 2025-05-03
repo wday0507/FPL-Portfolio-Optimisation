@@ -30,15 +30,42 @@ The plot below shows the scores of players, segmented by position, alongside the
 ![image](https://github.com/user-attachments/assets/523b9f80-40a4-4573-a41f-d718ca448613)
 
 
-The next plot shows the relationship between a players point this season, and next season. Across all seasons, the average r^2 is around 0.5 for goalkeepers, midfielders and forwards, whereas it as c0.3 for defenders. 
+The next plot explores the relationship between a player’s points in one season and their points in the following season. On average, the r^2 value is around 0.5 for goalkeepers, midfielders, and forwards, and approximately 0.3 for defenders.
 
-It wasnt obvious to me that the hardest position to predict next seasons points would be defenders, if i ahd to guess i would say its because 
+
+*** this has changes now as i nonly include players with season minutes > 1000 ***
+It wasn’t immediately obvious to me that defenders would be the hardest position to predict. If I had to guess, I’d attribute it to the higher volatility in their scoring often dependent on clean sheets, which are more team dependent and less consistent than goal contributions.
+
+An r^2 of 0.5 already indicates a fairly strong relationship, suggesting that current season performance is a decent predictor of next season’s output. Next, I’ll explore whether there are any position-specific patterns or relationships that can help refine this further.
+
+![image](https://github.com/user-attachments/assets/90fbb930-9e5f-4cda-8bb6-70a011588d22)
+
 
 Modeling Expected Points
+
+The next step involves modelling a player’s expected FPL points. The goal is to understand how each input contributes to a player's total output and to estimate expected future performance using interpretable linear models. These models will be trained on historical data, and I will evaluate their fit across different positions to account for role specific dynamics in point scoring.
+
+Before performing any regression analysis, it's important to assess multicollinearity between the predictor variables. High multicollinearity can distort coefficient estimates and reduce model interpretability.
+
+I use Varianec Infation Facotor (VIF) to measure multicollineairty, VIF quantifies how much a variable's coeffiecint variance is inflated due to multicollinearity with other predictors
+The formula is VIF(X) = 1 / (1 - R^2) where R^2 is the R^2 from regressing X on all the other predictors. If VIF for a given variable is high, that variable can be explained by the other variables
+
+
+As expected, the total points variable exhibits extremely high multicollinearity with other features like goals, assists, and minutes, this makes sense given that total points is largely a function of those underlying stats. For this reason, total points should not be included as an independent variable in any regression. Other variables such as goals, assists, and minutes display moderate multicollinearity, which is acceptable for regression purposes.
+
+**output here**
+
+
+The table below presents the average adjusted R² values of linear regression models across multiple seasons, segmented by player position and based on different combinations of predictor variables. The results clearly indicate that attempting to decompose total points into position-specific performance metrics does not lead to more accurate predictions of future points. In every case, the most effective model remains the simplest: a player’s total points in season one is the best predictor of their total points in season two.
+
+Total points already encapsulates the key performance metrics such as goals, assists, minutes played and clean sheets, along with other contributing factors. Attempting to reconstruct it from its components introduces noise without improving predictive power. The challenge is analogous to forecasting stock returns, it is very difficult, and identifying predictive signals often requires proprietary, high-quality data. In the context of FPL, this suggests that simple historical performance may contain more predictive value than trying to model points from isolated metrics.
+
+![image](https://github.com/user-attachments/assets/6bd4d002-710c-4964-9ba6-fc3ac86845ef)
 
 
 Team Optimisation & Strategy
 
+In this section, we use each player's points in Season N as a proxy for their expected performance in Season N+1. Using this estimate, we build an optimal 15-player FPL squad under standard game constraints (budget, formation, max 3 per team) by solving a binary optimisation problem. The goal is to maximise expected points while respecting realistic squad structure rules.
 
 Baseline Teams (for Comparison)
 
