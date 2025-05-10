@@ -1,5 +1,5 @@
 ### Motivation ###
-This project investigates the potential of applying portfolio optimisation techniques to Fantasy Premier League (FPL) team selection. The goal is to assess whether these quantitative methods, commonly used to optimise asset allocation, can improve decision making in FPL by balancing risk and reward when selecting players. The randomness and unpredictability of football present a unique challenge when applying these methods, adding an extra layer of complexity. 
+This project investigates the potential of applying portfolio optimisation techniques to Fantasy Premier League (FPL) team selection. The goal is to assess whether these quantitative methods, commonly used to optimise asset allocation, can improve decision making in FPL by balancing risk and reward when selecting players. The randomness and unpredictability of football present a unique challenge when applying these methods.
 
 This project also aims to demonstrate my understanding of financial concepts while showcasing skills in data cleaning, statistical analysis, and model development.
 <br>
@@ -43,21 +43,18 @@ This is likely due to the scoring patterns of 'high value' players like Salah/Ha
 <br>
 <br>
 
-The plot below shows the scores of players, segmented by position, alongside their respective prices. The first  observation is that top performing forwards and midfielders tend to score significantly higher than the average player, particularly when compared to goalkeepers and defenders. This suggests that the higher priced players may justify their premium. However, there is considerable variation in performance at each price point. While more expensive players generally perform better, higher costs do not always guarantee higher scores, this holds true with the exception of the most expensive players.
+The plot below shows the scores of players, segmented by position, alongside their respective prices for the 22/23 season. The first  observation is that top performing forwards and midfielders tend to score significantly higher than the average player, particularly when compared to goalkeepers and defenders. This suggests that the higher priced players may justify their premium. However, there is considerable variation in performance at each price point. While more expensive players generally perform better, higher costs do not always guarantee higher scores, this holds true with the exception of the most expensive players.
 
-![image](https://github.com/user-attachments/assets/523b9f80-40a4-4573-a41f-d718ca448613)
+![image](https://github.com/user-attachments/assets/c5c36aa5-26cc-45c1-affb-a9a1831c3f06)
 <br>
 <br>
 
-The next plot explores the relationship between a player’s points in one season and their points in the following season. On average, the r^2 value is around 0.5 for goalkeepers, midfielders, and forwards, and approximately 0.3 for defenders.
+The next plot explores the relationship between a player’s points in one season (21/22) and their points in the following season (22/23). Across all measured seasons, the avg. r^2 for GK's is c0.35, DEF's is c0.2, MID's is c0.35-0.40 and FWD's is c0.3. These mini regressions exlcude players who played less than 1000 minutes in 'season 1'. Without this filter, the r^2 values would be artificially inflated (around 0.5), primarily due to a large number of players who recorded 0 minutes and 0 points in both seasons.
 
 
-*** this has changes now as i nonly include players with season minutes > 1000 ***
-It wasn’t immediately obvious to me that defenders would be the hardest position to predict. If I had to guess, I’d attribute it to the higher volatility in their scoring often dependent on clean sheets, which are more team dependent and less consistent than goal contributions.
 
-An r^2 of 0.5 already indicates a fairly strong relationship, suggesting that current season performance is a decent predictor of next season’s output. Next, I’ll explore whether there are any position-specific patterns or relationships that can help refine this further.
-
-![image](https://github.com/user-attachments/assets/90fbb930-9e5f-4cda-8bb6-70a011588d22)
+These figures suggest moderate persistence in performancem with midfielders showing the highest year to year consistency. Next, I aim to improve on this baseline by incorporatng additional predictive features. 
+![image](https://github.com/user-attachments/assets/7658c285-e997-4f8c-b277-bf4520e1b6f4)
 <br>
 <br>
 
