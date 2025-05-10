@@ -66,13 +66,19 @@ The goal is to understand how each input contributes to a player's total output 
 
 Before performing any regression analysis, it's important to assess multicollinearity between the predictor variables. High multicollinearity can distort coefficient estimates and reduce model interpretability.
 
-I use Varianec Infation Factor (VIF) to measure multicollineairty, VIF quantifies how much a variable's coeffiecint variance is inflated due to multicollinearity with other predictors
+I use Variance Infation Factor (VIF) to measure multicollineairty, VIF quantifies how much a variable's coeffiecint variance is inflated due to multicollinearity with other predictors
 The formula is VIF(X) = 1 / (1 - R^2) where R^2 is the R^2 from regressing X on all the other predictors. If VIF for a given variable is high, that variable can be explained by the other variables
 
 
-As expected, the total points variable exhibits extremely high multicollinearity with other features like goals, assists, and minutes, this makes sense given that total points is largely a function of those underlying stats. For this reason, total points should not be included as an independent variable in any regression. Other variables such as goals, assists, and minutes display moderate multicollinearity, which is acceptable for regression purposes.
+As expected, the total points variable exhibits extremely high multicollinearity with other features like goals, assists, and minutes, this makes sense given that total points is largely a function of those underlying stats. For this reason, total points should not be included as an independent variable in any regression. Notably, features such as minutes for GK's and goals scored for FWD's contain high multicollinearity as well, I suspect that this is because a large portion of the difference in points scored between GK's comes from differences in minutes (ditto for FWD's and goals scored). For this reason, the 2nd VIF graph below shows the VIF for each predictor without the total points variable. After this change, we can see the predictor contain moderate but accpetbale multicollinearity. 
 
-**output here**
+
+![image](https://github.com/user-attachments/assets/6d308fee-4b83-441b-b935-140102056d0e)
+
+
+![image](https://github.com/user-attachments/assets/32a24c9d-a625-42eb-b810-fe786e641f40)
+
+
 <br>
 <br>
 
