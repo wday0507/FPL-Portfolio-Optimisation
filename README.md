@@ -28,7 +28,7 @@ I try and extract meaningful predictors that are not immediately obvious in the 
 
 ***
 
-### Exploratory Data Analysis ###
+# Exploratory Data Analysis #
 
 Although the end goal is to construct an optimal FPL team, how we will do it is not immediately obvious. Exploratory Data Analysis (EDA) is therefore a crucial step, it allows me to investigate patterns in player performance, understand key features such as point distributions by position, and evaluate predictor variables.
 
@@ -60,7 +60,9 @@ These figures suggest moderate persistence in performancem with midfielders show
 
 ***
 
-### Modeling Expected Points ###
+# Modeling Expected Points #
+
+## Dealing with Multicollinearity ## 
 
 The goal is to understand how each input contributes to a player's total output and to estimate expected future performance using interpretable linear models. These models will be trained on historical data, and I will evaluate their fit across different positions to account for role specific dynamics in point scoring.
 
@@ -69,30 +71,41 @@ Before performing any regression analysis, it's important to assess multicolline
 I use Variance Infation Factor (VIF) to measure multicollineairty, VIF quantifies how much a variable's coeffiecint variance is inflated due to multicollinearity with other predictors
 The formula is VIF(X) = 1 / (1 - R^2) where R^2 is the R^2 from regressing X on all the other predictors. If VIF for a given variable is high, that variable can be explained by the other variables
 
+As expected, the total points variable shows extremely high multicollinearity with features like goals, assists, and minutes which is unsurprising given that total points is largely derived from these stats. For this reason, total points is excluded as a predictor in any regression model.
 
-As expected, the total points variable exhibits extremely high multicollinearity with other features like goals, assists, and minutes, this makes sense given that total points is largely a function of those underlying stats. For this reason, total points should not be included as an independent variable in any regression. Notably, features such as minutes for GK's and goals scored for FWD's contain high multicollinearity as well, I suspect that this is because a large portion of the difference in points scored between GK's comes from differences in minutes (ditto for FWD's and goals scored). For this reason, the 2nd VIF graph below shows the VIF for each predictor without the total points variable. After this change, we can see the predictor contain moderate but accpetbale multicollinearity. 
-
-
-![image](https://github.com/user-attachments/assets/6d308fee-4b83-441b-b935-140102056d0e)
+After removing total points, we still observe notable multicollinearity between clean sheets and minutes played for goalkeepers. Since clean sheets are more volatile than minutes, I choose to exclude them. With this adjustment, all remaining VIF values fall within an acceptable range.
 
 
-![image](https://github.com/user-attachments/assets/32a24c9d-a625-42eb-b810-fe786e641f40)
+![image](https://github.com/user-attachments/assets/91caae58-4b42-47f5-95a6-4031f32d0a64)
+<br>
+<br>
+![image](https://github.com/user-attachments/assets/be5d4ffe-2734-4cf2-b482-b259d730057e)
+<br>
+<br>
+![image](https://github.com/user-attachments/assets/10265e44-2cf0-4905-a7d2-a61a60c4109a)
+
+
 
 
 <br>
 <br>
+## Linear Regression ##
 
-The table below presents the average adjusted R² values of linear regression models across multiple seasons, segmented by player position and based on different combinations of predictor variables. The results clearly indicate that attempting to decompose total points into position specific performance metrics does not lead to more accurate predictions of future points. In every case, the most effective model remains the simplest: a player’s total points in season one is the best predictor of their total points in season two.
+The chart below shows the average adjusted r^2 values of linear regression models across multiple seasons, segmented by player position and using various combinations of predictor variables. The results show the simplest model using total points from season 1 outperforms all others in predicting total points in season 2.
 
-Total points already encapsulates the key performance metrics such as goals, assists, minutes played and clean sheets, along with other contributing factors. Attempting to reconstruct it from its components introduces noise without improving predictive power. The challenge is analogous to forecasting stock returns, it is very difficult, and identifying predictive signals often requires proprietary, high-quality data. In the context of FPL, this suggests that simple historical performance may contain more predictive value than trying to model points from isolated metrics.
+This makes intuitive sense. Total points already aggregate key performance metrics such as goals, assists, minutes played, and clean sheets. Attempting to reconstruct it from its components adds noise without improving predictive power.
 
-![image](https://github.com/user-attachments/assets/6bd4d002-710c-4964-9ba6-fc3ac86845ef)
+The challenge is similar to forecasting stock returns, it's extremely difficult, and meaningful signals often require proprietary or higher-quality data. In the context of FPL, historical total points appear to carry more predictive information than decomposing them into underlying metrics. Even derived features such as trends in form or minutes over time fail to improve out of sample performance.
+
+![image](https://github.com/user-attachments/assets/41053617-37df-419d-adb1-156e72a3bacc)
+
+
 <br>
 <br>
 
 ***
 
-### Team Optimisation & Strategy ###
+# Team Optimisation #
 
 ## Objective: ##
 
