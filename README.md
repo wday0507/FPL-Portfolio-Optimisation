@@ -1,3 +1,4 @@
+***
 # Motivation #
 This project investigates the potential of applying portfolio optimisation techniques to Fantasy Premier League (FPL) team selection. The goal is to assess whether these quantitative methods, commonly used to optimise asset allocation, can improve decision making in FPL by balancing risk and reward when selecting players. The randomness and unpredictability of football present a unique challenge when applying these methods.
 
@@ -8,7 +9,7 @@ This project also aims to demonstrate my understanding of financial concepts whi
 
 # Data Sources & Cleaning #
 
-The data source for this project is a collection of dataframes from GitHub user "vaastav", who has compiled comprehensive FPL datasets for each season. These datasets contain detailed gameweek statistics for every player, including total points, goals, assists, minutes played, and more. I use data from the 2017/18 season through to 2023/24.
+The data source for this project is a collection of dataframes from GitHub user "vaastav", who has compiled comprehensive FPL datasets for each season. These datasets contain detailed gameweek statistics for every player, including total points, goals, assists, minutes played, and more. The dataset from each season contains c500 players for 38 gameweeks (c.20,000 rows total). I use data from the 2017/18 season through to 2023/24.
 To tailor the data for my analysis, several cleaning and preprocessing steps were required. Key challenges included:
 - Inconsistent player names across seasons, e.g. name changes "Heung-Min Son" --> "Son Heung-min" makes it hard to track player perfomance over time
 - The dataframes from earlier seasons did not have team names, only opponent team number, this required considerable remapping
@@ -20,7 +21,7 @@ To tailor the data for my analysis, several cleaning and preprocessing steps wer
 # Feature Engineering #
 
 I try and extract meaningful predictors that are not immediately obvious in the dataset. This aims to improve prediction accuracy. For example:
-- Goals per 90: noramlises goals to per 90 mins player to help identify efficietn goal scorers
+- Goals per 90: normalises goals to per 90 mins player to help identify efficient goal scorers
 - Form trend: measures change in performance, indicates player improvements that may not be priced in
 - Minutes momentum: tracks whether a player is increasing or decreasing game time
 <br>
@@ -38,12 +39,13 @@ The first plot highlights a positive convex relationship between the standard de
 
 This mirrors the risk/return tradeoff seen in financial markets; achieving higher returns typically requires accepting more risk. However, in finance, the relationship is often concave (i.e. marginal returns diminish with added risk), whereas here we observe convexity (greater volatility appears to amplify total returns).
 
-This is likely due to the scoring patterns of 'high value' players like Salah/Haaland, who may score few points in week 1 but a hatrick in week 2. In contrast, defenders tend to accumulate points more steadily, leading to lower volatility and lower overall upside.
+This is likely due to the scoring patterns of 'high value' players like Salah/Haaland, who may score 0 points in week 1 but a hatrick in week 2. In contrast, defenders tend to accumulate points more steadily, leading to lower volatility and lower overall upside.
 ![image](https://github.com/user-attachments/assets/f03d6954-2ee4-4d4e-96da-c22228861353)
 <br>
 <br>
 
-The plot below shows the scores of players, segmented by position, alongside their respective prices for the 22/23 season. The first  observation is that top performing forwards and midfielders tend to score significantly higher than the average player, particularly when compared to goalkeepers and defenders. This suggests that the higher priced players may justify their premium. However, there is considerable variation in performance at each price point. While more expensive players generally perform better, higher costs do not always guarantee higher scores, this holds true with the exception of the most expensive players.
+The plot below shows player scores by position and price for the 22/23 season. Top performing forwards and midfielders tend to score well above the average, especially compared to goalkeepers and defenders, suggesting that premium players can justify their cost. However, performance varies considerably at each price point. While expensive players generally perform better, higher prices do not always mean higher scores, except for the very top-priced players.
+
 
 ![image](https://github.com/user-attachments/assets/c5c36aa5-26cc-45c1-affb-a9a1831c3f06)
 <br>
@@ -53,7 +55,7 @@ The next plot explores the relationship between a player’s points in one seaso
 
 
 
-These figures suggest moderate persistence in performancem with midfielders showing the highest year to year consistency. Next, I aim to improve on this baseline by incorporatng additional predictive features. 
+These figures suggest moderate persistence in performance with midfielders showing the highest year to year consistency. Next, I aim to improve on this baseline by incorporatng additional predictive features. 
 ![image](https://github.com/user-attachments/assets/7658c285-e997-4f8c-b277-bf4520e1b6f4)
 <br>
 <br>
@@ -62,18 +64,20 @@ These figures suggest moderate persistence in performancem with midfielders show
 
 # Modeling Expected Points #
 
+To build the best possible FPL team, we ideally want to predict next season’s points as accurately as possible. While using last season’s points is a reasonable baseline, this section explores whether we can improve on that with a more refined approach.
+<br>
+<br>
+
+
 ### Dealing with Multicollinearity ### 
 
-The goal is to understand how each input contributes to a player's total output and to estimate expected future performance using interpretable linear models. These models will be trained on historical data, and I will evaluate their fit across different positions to account for role specific dynamics in point scoring.
+Before running any regression, it's important to check for multicollinearity between predictors, as it can distort coefficient estimates and reduce interpretability.
 
-Before performing any regression analysis, it's important to assess multicollinearity between the predictor variables. High multicollinearity can distort coefficient estimates and reduce model interpretability.
+I use Variance Infation Factor (VIF), which measures how much a variable's variance is inflated due to correlation with other predictors. The formula is VIF(X) = 1 / (1 - R^2) where R^2 is the R^2 from regressing X on all the other predictors. 
 
-I use Variance Infation Factor (VIF) to measure multicollineairty, VIF quantifies how much a variable's coeffiecint variance is inflated due to multicollinearity with other predictors
-The formula is VIF(X) = 1 / (1 - R^2) where R^2 is the R^2 from regressing X on all the other predictors. If VIF for a given variable is high, that variable can be explained by the other variables
+As expected, the total points variable shows extremely high multicollinearity with features like goals, assists, and minutes which is unsurprising given that total points is largely derived from these stats. For this reason, total points is excluded from my models.
 
-As expected, the total points variable shows extremely high multicollinearity with features like goals, assists, and minutes which is unsurprising given that total points is largely derived from these stats. For this reason, total points is excluded as a predictor in any regression model.
-
-After removing total points, we still observe notable multicollinearity between clean sheets and minutes played for goalkeepers. Since clean sheets are more volatile than minutes, I choose to exclude them. With this adjustment, all remaining VIF values fall within an acceptable range (<5).
+After removing total points, we still observe notable multicollinearity between clean sheets and minutes played for goalkeepers. Since clean sheets are more volatile than minutes, I choose to exclude them. With this adjustment, all remaining VIF values fall within an acceptable range (<5). This process helps guide model selection by removing redundant predictors.
 
 
 ![image](https://github.com/user-attachments/assets/91caae58-4b42-47f5-95a6-4031f32d0a64)
@@ -92,11 +96,13 @@ After removing total points, we still observe notable multicollinearity between 
 
 ### Linear Regression ###
 
-The chart below shows the average adjusted r^2 values of linear regression models across multiple seasons, segmented by player position and using various combinations of predictor variables. The results show the simplest model using total points from season 1 outperforms all others in predicting total points in season 2.
+I run a range of linear regression models for each position, testing different combinations of predictor variables while managing multicollinearity. A full breakdown of feature sets is available in the Jupyter notebook. The chart below compares the performance of some of these models alongside a simple baseline for each position.
 
-This makes intuitive sense. Total points already aggregate key performance metrics such as goals, assists, minutes played, and clean sheets. Attempting to reconstruct it from its components adds noise without improving predictive power.
+The results show that the naive model, which uses total points from the previous season as the sole predictor, consistently outperforms all other models in predicting total points for the following season.
 
-The challenge is similar to forecasting stock returns, it's extremely difficult, and meaningful signals often require proprietary or higher-quality data. In the context of FPL, historical total points appear to carry more predictive information than decomposing them into underlying metrics. Even derived features such as trends in form or minutes over time fail to improve out of sample performance.
+Total points already embed key performance indicators like goals, assists, minutes played, and clean sheets. Trying to reconstruct it from its components introduces noise and degrades predictive performance.
+
+The challenge here is similar to forecasting stock returns, signals are weak, and useful predictive power is hard to extract without high quality data. In the context of FPL, previous total points carry more information than breaking them into individual stats or engineering additional features. Even models using trends in form or minutes fail to outperform the baseline out of sample.
 
 ![image](https://github.com/user-attachments/assets/41053617-37df-419d-adb1-156e72a3bacc)
 
@@ -135,6 +141,8 @@ The optimisation problem is subject to several constraints to ensure the squad m
 ### High Level Algorithm: ###
 
 This problem is a mixed integer linear program solved using a scipy solver. The decision variables are whether a player is in the squad and whether they are in the starting lineup and the objective function is to maximise the expected points while minimising risk. The constraints ensure that the team composition adheres to the rules of FPL.
+<br>
+<br>
 
 ### Lambda Experimentation ###
 
@@ -151,16 +159,19 @@ Below is the optimal team choice for the 23/24 season based on 22/23 data. The a
 ![image](https://github.com/user-attachments/assets/b1f94429-82a1-4293-818e-80e938ab4bd2)
 <br>
 <br>
-***
 
+***
 
 ### Baseline Teams (for Comparison) ###
 
 To fairly benchmark my optimal team, I need a baseline to compare against. I simulate this by generating thousands of random teams using a simple greedy/random logic that mimics how a casual player might build their squad. The idea is: a typical user sees a list of players, grabs one or two expensive stars, then realises they’re running out of budget and fills the rest with mid range or cheap options, often resulting in a few strong picks and a bunch of weak fillers. The algorithm follows this pattern by randomly choosing quotas of expensive, medium, and cheap players, then filling a squad under budget while satisfying basic position and club constraints. This gives me a realistic distribution of “naive” team performances to compare against helping to show whether my optimised solution actually adds value over random or common sense strategies.
+<br>
+<br>
+
 ***
 
 # Results #
-Results show that my optimal team outperforms the average 'baseline team' from anywhere between 30 and 500 points per season.
+These results demonstrate that my optimal team consistently outperforms the baseline teams across all seasons, with gains ranging from 30 to over 400 points. Importantly, each optimal team is constructed using only data from the preceding season. This avoids any hindsight bias and suggests that the model captures information that generalises well to future performance. Whilst the model is an improvement compared to the baseline teams, the variation in performance is significant and highlights the inherent randomness in football.
 
 ![image](https://github.com/user-attachments/assets/5cf2dbb9-3579-427d-bdf9-2f30341c5388)
 
@@ -178,13 +189,19 @@ No Train/Test Split: There is no explicit model training or validation, each sea
 
 Substitutes: Substitute players are given a flat 10% contribution to the objective function. No rotation or fixture based logic is applied.
 
+No significance testing: Formal significance testing across seasons is not performed due to the small sample size (only 6 seasons), which makes statistical inference unreliable. Additionally, the distribution of team scores varies significantly between seasons, violating key assumptions of standard hypothesis tests. 
+<br>
+<br>
+
 
 ***
 
 # Conclusion & Next Steps #
 
-This project demonstrates that whilst portfolio optimisation principles cannot be directly applied to FPL team construction, a basic optimisation framework can still add value to team selection process. The optimal team, built using prior season points data, consistently outperforms simulated teams, thought the margin of outperformance varies considerably. 
+This project demonstrates that whilst portfolio optimisation principles cannot be directly applied to FPL team construction, a basic optimisation framework can still add value to team selection process. The optimal team, built using prior season points data, consistently outperforms simulated teams, though the margin of outperformance varies considerably. 
 
 Next steps:
-1/ Find FPL 'Alpha': explore richer player/team elvel features that may predict future performance better than apst total points (e.g. player role changes, match load, betting odds derived signals). 
+
+1/ Find FPL 'Alpha': explore richer player/team level features that may predict future performance better than past total points (e.g. player role changes, match load, betting odds derived signals). 
+
 2/ Simulate performance: develop a more realistic season long simulation that reflects how the team would perform in the upcoming season, rather than just evaluating past points. This would enable more accurate comparison to baseline teams, and real world teams.
